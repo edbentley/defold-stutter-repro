@@ -1,0 +1,47 @@
+MOVE_PER_FRAME = 10
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+
+	self.is_touch_down = false
+
+	self.level_objects = {}
+
+	for i = 1, 20 do
+		table.insert(self.level_objects, "rect" .. i)
+	end
+end
+
+function fixed_update(self, dt)
+	local delta = dt * 60
+	
+	for i = 1, #self.level_objects do
+		local id = self.level_objects[i]
+
+		local position = go.get_position(id)
+		
+		position.x = position.x - MOVE_PER_FRAME * delta
+		if position.x < -100 then
+			position.x = 2020
+		end
+		
+		go.set_position(position, id)
+	end
+
+	if self.is_touch_down then
+		label.set_text("#label", "DOWN")
+	else
+		label.set_text("#label", "UP")
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") then
+		if action.pressed then
+			self.is_touch_down = true
+		elseif action.released then
+			self.is_touch_down = false
+		end
+	end
+end
